@@ -25,19 +25,27 @@ Unset Standard Proposition Elimination Names.
 
 Open Scope positive_scope.
 
+(*Os teoremas provados nesse arquivo sobre numeros positivos e inteiros servem de base para as provas dos outros arquivos. 
+Algumas provas se tentam mapear os positivos para naturais pois os naturais tem mais coisas provadas sobre eles e também são mais simples de trabalhar*)
+
+(*Essa prova so converte o scolpo de positivos para naturais e aproveita a prova ja existente para naturais*)
 Lemma add_cresc_positive : forall (n m : positive), n <= n + m.
 Proof.
   intros.
-  rewrite Pos2Nat.inj_le.
-  rewrite Pos2Nat.inj_add.
+  rewrite Pos2Nat.inj_le, Pos2Nat.inj_add.
   apply le_plus_l.
 Qed.
 
 Open Scope nat_scope.
 
+(*Prova que a conversão de um positivo para natural da um natural maior ou igual a 1
+  Para provar realizamos uma indução no n. utilizamos:
+  - todo natural é maior ou igual a 0
+  - <= é transitiva
+  - um natural é sempre menor ou igual a soma dele com outro número
+*)
 Lemma to_nat_pos : forall (n : positive), 1 <= Pos.to_nat n.
 Proof.
-  intros.
   induction n.
   - rewrite Pos.xI_succ_xO, Pos2Nat.inj_succ.
     apply Peano.le_n_S, Peano.le_0_n.
@@ -49,6 +57,8 @@ Proof.
     apply Peano.le_n_S, Peano.le_0_n.
 Qed.
 
+(*Prova equivalente a prova acima para generalização existencial.
+  Destruimos os casos e com a prova acima provamos que o consrutor 0 é impossivel logo precisa existir um S m*)
 Lemma to_nat_pos_S_n : forall (n : positive), exists m,  Pos.to_nat n = S m.
 Proof.
   intros n.
@@ -57,6 +67,9 @@ Proof.
   - exists n0. reflexivity.
 Qed.
 
+(*Prova de que a multiplicação de positivos é sempre crescente
+  Convertemos os numeros para naturais da forma S m
+  Transformamos a multiplicação em soma e usamos a prova de que (x <= x + ?)*)
 Lemma mult_cresc_positive : forall (n m :positive), (n <= n * m)%positive.
 Proof.
   intros.
@@ -66,44 +79,45 @@ Proof.
   inversion H1.
   inversion H2.
   rewrite H, H0.
+  rewrite Nat.mul_comm.
   simpl.
-  apply le_n_S.
-  rewrite <- mult_n_Sm, Nat.add_comm.
-  assert ((x * x0) + x = x + (x * x0)). {apply Nat.add_comm. } rewrite H3.
-  rewrite plus_assoc_reverse. apply le_plus_l.
+  apply le_n_S, le_plus_l.
 Qed.
-  
+
+(*Prova que multiplicação é estritamente crescente se o multiplicador é maior que 1
+  Converter para naturais da forma S m
+  destrinchar a multiplicação como em soma, adicionar um S _ como m > 1 e usando comutatividade e acossiatividade e  termina a prova usando que (x <= x + ?)*)
 Lemma mult_cresc_positive_gt_1 : forall (n m : positive), ((m > 1) -> n < n * m)%positive.
 Proof.
   intros.
-  rewrite Pos2Nat.inj_lt.
-  rewrite Pos2Nat.inj_mul.
-  rewrite Pos2Nat.inj_gt in H.
-  rewrite Pos2Nat.inj_1 in H.
+  rewrite Pos2Nat.inj_lt, Pos2Nat.inj_mul.
+  rewrite Pos2Nat.inj_gt, Pos2Nat.inj_1 in H.
   assert (H1: exists n' , Pos.to_nat n = S n'). apply to_nat_pos_S_n.
   assert (H2: exists m' , Pos.to_nat m = S m'). apply to_nat_pos_S_n.
   inversion H1.
   inversion H2.
   rewrite H0, H3.
   rewrite H3 in H.
-  simpl. apply lt_n_S.
-  rewrite Nat.mul_comm.
-  simpl.
-  apply gt_S_n in H.
-  apply gt_le_S in H.
+  apply gt_S_n, gt_le_S in H.
   destruct x0.
   - inversion H.
-  - simpl. apply le_lt_n_Sm. rewrite plus_comm, plus_assoc_reverse. apply le_plus_l.
+  - simpl. 
+    apply lt_n_S, le_lt_n_Sm. 
+    rewrite Nat.mul_comm. 
+    simpl.
+    rewrite plus_comm, plus_assoc_reverse. 
+    apply le_plus_l.
 Qed.
 
 Open Scope positive_scope.
 
+(*Prova que 1 é o fator nulo da multiplicação 
+  Destruir m e provar que se m é da forma m~0 ou m~1 é contradição logo m precisa ser 1*)
 Lemma mult_positive_l : forall (n m : positive), (n = n * m -> m = 1)%positive.
 Proof.
   intros.
   destruct m.
-  - 
-    apply Pos.eqb_eq in H.
+  - apply Pos.eqb_eq in H.
     rewrite Pos.xI_succ_xO in H. 
     rewrite Pos.mul_succ_r in H.
     assert (H1: n <> n + n*m~0). { apply not_eq_sym. rewrite Pos.add_comm. apply Pos.add_no_neutral. }
@@ -130,30 +144,18 @@ Qed.
 
 Open Scope Z_scope.
 
+(*Provar fator nulo da multiplicação 0*)
 Lemma mult_symm_0 : forall (m : Z), m * 0 = 0.
 Proof.
-  intros m.
-  induction m.
-  + reflexivity.
-  + reflexivity.
-  + reflexivity.
+  apply Z.mul_0_r.
 Qed.
 
 Lemma mult_comm_Z : forall (n m : Z), n * m = m * n.
 Proof.
-  intros n.
-  induction n.
-  + intros m. simpl. rewrite mult_symm_0. reflexivity.
-  + intros m. destruct m.
-    - reflexivity.
-    - simpl. rewrite Pos.mul_comm. reflexivity.
-    - simpl. rewrite Pos.mul_comm. reflexivity.
-  + intros m. destruct m.
-    - reflexivity.
-    - simpl. rewrite Pos.mul_comm. reflexivity.
-    - simpl. rewrite Pos.mul_comm. reflexivity.
+  apply Z.mul_comm.
 Qed. 
 
+(**)
 Lemma mult_lemma1_Z : forall (n m : Z), (n > 0) -> (m > 0) -> (n <= n*m).
 Proof.
   intros.
