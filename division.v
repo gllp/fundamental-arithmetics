@@ -472,8 +472,6 @@ Proof.
     + unfold divides in H.
       exists (Z.pos p / Z.pos p0).
       destruct H.
-      Open Scope nat_scope.
-      Search (_ / _).
 Admitted.
 
 (** we can now define the quotient of a by b in case of b | a *)
