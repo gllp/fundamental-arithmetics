@@ -16,6 +16,15 @@
 (* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA *)
 (* 02110-1301 USA *)
 
+(** Aqui está o primeiro arquivo do projeto, no qual começamos *)
+(** a transpor os resultdos desta biblioteca sobre números naturais *)
+(** para números inteiros. No decorrer das provas, algumas já existiam *)
+(** na biblioteca em coq, mas provamos alguns resultados mesmo assim *)
+(** para ter mais intuição de provas e também podermos transpor resultados *)
+(** a nossa maneira para podermos aplicar em resultados mais complexos. *)
+(** Na parte superior, mantivemos o header com direitos autorais, de maneira *)
+(** a garantir a origem da biblioteca original. *)
+
 Require Export ZArith.
 Require Export Arith.
 Require Export ArithRing.
@@ -25,10 +34,10 @@ Unset Standard Proposition Elimination Names.
 
 Open Scope positive_scope.
 
-(*Os teoremas provados nesse arquivo sobre numeros positivos e inteiros servem de base para as provas dos outros arquivos. 
+(** Os teoremas provados nesse arquivo sobre numeros positivos e inteiros servem de base para as provas dos outros arquivos. 
 Algumas provas se tentam mapear os positivos para naturais pois os naturais tem mais coisas provadas sobre eles e também são mais simples de trabalhar*)
 
-(*Essa prova so converte o scolpo de positivos para naturais e aproveita a prova ja existente para naturais*)
+(** Essa prova so converte o scolpo de positivos para naturais e aproveita a prova ja existente para naturais*)
 Lemma add_cresc_positive : forall (n m : positive), n <= n + m.
 Proof.
   intros.
@@ -38,7 +47,7 @@ Qed.
 
 Open Scope nat_scope.
 
-(*Prova que a conversão de um positivo para natural da um natural maior ou igual a 1
+(** Prova que a conversão de um positivo para natural da um natural maior ou igual a 1
   Para provar realizamos uma indução no n. utilizamos:
   - todo natural é maior ou igual a 0
   - <= é transitiva
@@ -57,7 +66,7 @@ Proof.
     apply Peano.le_n_S, Peano.le_0_n.
 Qed.
 
-(*Prova equivalente a prova acima para generalização existencial.
+(** Prova equivalente a prova acima para generalização existencial.
   Destruimos os casos e com a prova acima provamos que o consrutor 0 é impossivel logo precisa existir um S m*)
 Lemma to_nat_pos_S_n : forall (n : positive), exists m,  Pos.to_nat n = S m.
 Proof.
@@ -67,7 +76,7 @@ Proof.
   - exists n0. reflexivity.
 Qed.
 
-(*Prova de que a multiplicação de positivos é sempre crescente
+(** Prova de que a multiplicação de positivos é sempre crescente
   Convertemos os numeros para naturais da forma S m
   Transformamos a multiplicação em soma e usamos a prova de que (x <= x + ?)*)
 Lemma mult_cresc_positive : forall (n m :positive), (n <= n * m)%positive.
@@ -84,7 +93,7 @@ Proof.
   apply le_n_S, le_plus_l.
 Qed.
 
-(*Prova que multiplicação é estritamente crescente se o multiplicador é maior que 1
+(** Prova que multiplicação é estritamente crescente se o multiplicador é maior que 1
   Converter para naturais da forma S m
   destrinchar a multiplicação como em soma, adicionar um S _ como m > 1 e usando comutatividade e acossiatividade e  termina a prova usando que (x <= x + ?)*)
 Lemma mult_cresc_positive_gt_1 : forall (n m : positive), ((m > 1) -> n < n * m)%positive.
@@ -111,7 +120,7 @@ Qed.
 
 Open Scope positive_scope.
 
-(*Prova que 1 é o fator nulo da multiplicação 
+(** Prova que 1 é o fator nulo da multiplicação 
   Destruir m e provar que se m é da forma m~0 ou m~1 é contradição logo m precisa ser 1*)
 Lemma mult_positive_l : forall (n m : positive), (n = n * m -> m = 1)%positive.
 Proof.
@@ -144,18 +153,22 @@ Qed.
 
 Open Scope Z_scope.
 
-(*Provar fator nulo da multiplicação 0*)
+(** Provar fator nulo da multiplicação 0. Já existia na biblioteca, mas *)
+(** provamos para renomear o lemma e ficar mais amigável para usarmos *)
 Lemma mult_symm_0 : forall (m : Z), m * 0 = 0.
 Proof.
   apply Z.mul_0_r.
 Qed.
 
+(** Provar fator comutatividade em Z. Já existia na biblioteca, mas *)
+(** provamos para renomear o lemma e ficar mais amigável para usarmos *)
 Lemma mult_comm_Z : forall (n m : Z), n * m = m * n.
 Proof.
   apply Z.mul_comm.
 Qed. 
 
-(**)
+(** Lemma 1 auxiliares: Prova que se, em Z, se n > 0 e m > 0 -> n <= n * m. *)
+(** Utilizamos resultados anteriores para provarmos essa propriedade *)
 Lemma mult_lemma1_Z : forall (n m : Z), (n > 0) -> (m > 0) -> (n <= n*m).
 Proof.
   intros.
@@ -169,6 +182,9 @@ Proof.
   - inversion H0.
 Qed.
 
+(** Lemma 2 auxiliares: Prova que se, em Z, se n*m = 0 -> um dos dois é 0. *)
+(** Utilizamos resultados anteriores para provarmos essa propriedade, bem *)
+(** como o uso de tauto para tautologias encontradas. *)
 Lemma mult_lemma2_Z : forall (n m : Z),(n*m = 0) -> (n=0)\/(m=0).
 Proof.  
   intros.
@@ -184,6 +200,10 @@ Proof.
     + inversion H.
 Qed.
 
+(** Lemma 3 auxiliares: Prova que se, em Z, se n > 0 e m > 1 -> n < n * m, *)
+(** ou seja, estritamente maior. *)
+(** Utilizamos resultados anteriores para provarmos essa propriedade, *)
+(** destruindo n e m e estudando os casos. *)
 Lemma mult_lemma3_Z : forall (n m : Z),(n > 0)->(m > 1)->(n < n*m).
 Proof.
   intros.
@@ -196,6 +216,9 @@ Proof.
   - inversion H.
 Qed.
 
+(** Lemma 4 auxiliares: n = n*m -> n = 0 \/ m = 1 .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** de resultados anteriores. *)
 Lemma mult_lemma4_Z : forall (n m : Z), n = n*m -> n = 0 \/ m = 1.
 Proof.
   intros n m H.
@@ -213,6 +236,9 @@ Proof.
     - inversion H.
 Qed.
 
+(** Lemma 5 auxiliares: n*m = 1 -> ambos são 1 ou -1 .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** de resultados anteriores e da biblioteca de coq. *)
 Lemma mult_lemma5_Z : forall (n m : Z),((n * m) =1)-> ((n=1)/\(m=1)) \/ ((n=-1)/\(m=-1)).
 Proof.
   intros n.
@@ -257,6 +283,9 @@ Proof.
             apply Pos.mul_eq_1_r in H2. reflexivity.
 Qed.
 
+(** Lemma 6 auxiliares: y - y = 0 .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** da biblioteca de coq. *)
 Lemma minus_same_number_Z : forall (y : Z), y - y = 0.
 Proof.
   intros y.
@@ -266,6 +295,9 @@ Proof.
   + simpl. apply Z.pos_sub_diag.
 Qed.
 
+(** Lemma 7 auxiliares: x + y - y = x .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** da biblioteca de coq e resultados anteriores. *)
 Lemma plus_minus_lemma1 : forall (y x : Z),(x+y-y=x).
 Proof.
   intros.
@@ -275,6 +307,9 @@ Proof.
   + apply Z.add_simpl_r.
 Qed.
 
+(** Lemma 8 auxiliares: a*n-n = (a-1)*n .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** da biblioteca de coq. *)
 Lemma mult_minus_lemma1_Z : forall (a n : Z),a*n-n = (a-1)*n.
 Proof.
   intros.
@@ -291,6 +326,10 @@ Proof.
   reflexivity.
 Qed.
 
+(** Lemma 9 auxiliares: Se n != 0 e (n*a=n*b) -> (a=b) .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** da biblioteca de coq. Utilizamos resultados anteriores, injetividade *)
+(** entre positives e Z.pos ou Z.neg. *)
 Lemma mult_lemma6_Z : forall (a b n : Z),(n <> 0)->(n*a=n*b)->(a=b).
 Proof.
   intros.
@@ -379,6 +418,10 @@ Proof.
         apply H2.
 Qed.
 
+(** Lemma 10 auxiliares: - x - y = - (x + y) .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** da biblioteca de coq. Resultado já provado na biblioteca, mas usamos *)
+(** da oportunidade para deixarmos mais explícito para usarmos. *)
 Lemma minus_distributive_Z : forall (x y z : Z), - x - y = - (x + y).
 Proof.
   intros.
@@ -394,6 +437,9 @@ Proof.
     * simpl. reflexivity.
 Qed.
 
+(** Lemma 11 auxiliares:  x - y - z = x - (y + z) .*)
+(** Utilizamos destruct para estudarmos os casos, bem como o auxílio *)
+(** da biblioteca de coq. Utilizamos injetividade aqui também. *)
 Lemma minus_minus_lemma2_Z : forall (x y z : Z), (x - y - z)=(x - (y + z)).
 Proof.  
   intros.
@@ -432,18 +478,25 @@ Proof.
       * symmetry. apply Z.sub_add_distr.
 Qed.
 
+(** Lemma 12 auxiliares: x * y * (z * t) = z * (x * y * t) .*)
+(** Utilizamos ring para aplicarmos propriedades do anel dos inteiros. *)
 Lemma mult_lemma7_Z : forall (x y z t : Z), x * y * (z * t) = z * (x * y * t).
 Proof.
   intros.
   ring.
 Qed.
 
+(** Lemma 13 auxiliares: (a < b) -> (0 < b - a) .*)
+(** Utilizamos omega para aplicarmos propriedades dos inteiros e *)
+(** automatizar a prova. *)
 Lemma minus_lt_lemma1 : forall (b a : Z),(a < b) -> (0 < b - a).
 Proof.
   intros.
   omega.
 Qed.
 
+(** Lemma 14 auxiliares: Z.pos p != 0 .*)
+(** Prova bem simples, utlizando implicação em falso. *)
 Lemma different_from_zero_pos : forall (p : positive), Z.pos p <> 0.
 Proof.
   intros.
@@ -452,6 +505,8 @@ Proof.
   inversion H.
 Qed.
 
+(** Lemma 15 auxiliares: Z.neg p != 0 .*)
+(** Prova bem simples, utlizando implicação em falso. *)
 Lemma different_from_zero_neg : forall (p : positive), Z.neg p <> 0.
 Proof.
   intros.
