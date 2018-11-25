@@ -9,9 +9,9 @@
 **adaptando os resultados para números positivos e negativos.**
 **Foram provados vários resultados, os quais se encontram em missing.v, division.v e euclides.v**
 
-**- Em missing, temos resultados auxiliares provados acerca dos números inteiros (1º arquivo).**
-**- Em division, temos resultados da relação de divisibilidade, provada em Z (2º arquivo).**
-**- Em euclides, temos resultados da divisão euclidiana (3º arquivo).**
+1. **- Em missing, temos resultados auxiliares provados acerca dos números inteiros (1º arquivo).**
+2. **- Em division, temos resultados da relação de divisibilidade, provada em Z (2º arquivo).**
+3. **- Em euclides, temos resultados da divisão euclidiana (3º arquivo).**
 
 **Os arquivos estão documentados, assim como suas definições e lemmas/teoremas, os que foram provados com sucesso**
 **e os que tiveram dificuldades e não se conseguiu terminar.**
