@@ -17,3 +17,8 @@
   sucesso e os que tiveram dificuldades e não se conseguiu terminar.**
 
 **Compiles with Coq 8.1pl2**
+
+**Grupo do projeto:
+Caio Carvalho - ccal
+Geovanny Lucas - gllp
+Rodrigo Castiel - rcrs2**
