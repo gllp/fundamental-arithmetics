@@ -542,10 +542,9 @@ Proof.
 Qed.
 
 (** Lemma 17 divisibilidade: o lemma diz que é possível se computar q, tal que *)
-(** a = b * q, se b | a. Tentamos prová-lo, mas sem sucesso. *)
-(** Não conseguimos entender como aplicar as ferramentas aprendidas *)
-(** na decidibilidade abaixo. Tentamos usar a definição de floor *)
-(** em Z (a / b) para ajudar na prova, mas sem sucesso. *)
+(** a = b * q, se b | a. Conseguimos provar usando a definição de *)
+(** piso em Z. Usando destruct e analisando os casos, conseguimos *)
+(** provar para todo a e b em Z. *)
 Lemma quo_dec : forall (a b : Z), (divides b a)-> {q : Z | a = b * q}.
 Proof.
   intros.
@@ -558,7 +557,42 @@ Proof.
     + unfold divides in H.
       exists (Z.pos p / Z.pos p0).
       destruct H.
-Admitted.
+      rewrite H.
+      rewrite mult_comm_Z.
+      rewrite Z_div_mult.
+      * ring.
+      * intuition.
+    + unfold divides in H.
+      exists (Z.pos p / Z.neg p0).
+      destruct H.
+      rewrite H.
+      rewrite mult_comm_Z.
+      rewrite Z.div_mul.
+      * ring.
+      * intuition.
+        inversion H0.
+  - destruct b.
+    + exists 0.
+      destruct H.
+      inversion H.
+    + unfold divides in H.
+      exists (Z.neg p / Z.pos p0).
+      destruct H.
+      rewrite H.
+      rewrite mult_comm_Z.
+      rewrite Z_div_mult.
+      * ring.
+      * intuition.
+    + unfold divides in H.
+      exists (Z.neg p / Z.neg p0).
+      destruct H.
+      rewrite H.
+      rewrite mult_comm_Z.
+      rewrite Z.div_mul.
+      * ring.
+      * intuition.
+        inversion H0.
+Qed.
 
 (** Definição do quociente em função da decidibilidade da divisão *)
 Definition quo (a b : Z) (H:(divides b a)) := let (q,_):=(quo_dec a b H) in q.

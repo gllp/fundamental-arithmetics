@@ -78,7 +78,7 @@ Qed.
 
 Open Scope Z_scope.
 
-(**Lemma 4 euclides: se b | a e |a| < |b| -> a = 0 *)
+(** Lemma 4 euclides: se b | a e |a| < |b| -> a = 0 *)
 (** Complemento ao lemma 16 do arquivo division.v . Para provarmos, *)
 (** untilizamos resultados provados anteriormente, bem como a definição *)
 (** de divides. *)
@@ -170,6 +170,7 @@ Proof.
     + destruct x0.
       * simpl. apply H1.
       * simpl.
+        assert (H3: Z.max (Z.pos p0) (Z.pos p1) < Z.pos p).
 Admitted.
 
 (** Lemma 7 euclides: se q é o quociente de a = b*q + r, e b > 0, *)
@@ -492,23 +493,128 @@ Proof.
 Qed.
 
 (** Lemma 10 euclides: unicidade do quociente *)
-(** Não conseguimos terminar a prova da unicidade, tentamos proseguir e *)
-(** paramos em b * (q - q0) = r - r0. *)
-(** Se provarmos r - r0 = 0, segue q - q0 imediatamente. *)
-Lemma quotient_uniquiness : forall (a b q q1 : Z), (quotient q a b) /\ (quotient q1 a b) -> q = q1.
+(** Prova que, dado a = b*q + r, q é único *)
+(** Para provarmos, utilizamos resultados provados anteriormente, *)
+(** precisando do resultado do lemma 6, além de resultados em missing.v, *)
+(** bem como resultados de bibliotecas, os quais às vezes precisaram ser *)
+(** adaptados.*)
+Lemma quotient_uniquiness : forall (a b q q1 : Z), (b <> 0) /\ (quotient q a b) /\ (quotient q1 a b) -> q = q1.
 Proof.
   intros.
   destruct H as [H1 H2].
-  unfold quotient in H1.
-  unfold quotient in H2.
-  destruct H1.
-  destruct H2.
+  destruct H2 as [H3 H4].
+  unfold quotient in H3.
+  unfold quotient in H4.
+  destruct H3.
+  destruct H4.
   destruct H.
   destruct H0.
-  rewrite H1 in H2.
+  rewrite H3 in H2.
   rewrite Z.add_move_l in H2.
   rewrite Z.add_sub_swap in H2.
   rewrite <- Z.mul_sub_distr_l in H2.
   symmetry in H2.
   rewrite Zeq_plus_swap in H2.
-Admitted.
+  assert (H7: forall (p q : positive), Z.pos_sub q p = - Z.pos_sub p q).
+  {
+      intros.
+      symmetry.
+      apply Z.pos_sub_opp.
+  }
+  assert (H4: Z.abs (x0 - x) < Z.abs b).
+  {
+     apply smaller_number_div.
+     split.
+     apply H0.
+     apply H.
+  }
+  assert (H5: x - x0 = 0).
+  {
+    apply divides_zero_module with (b:=b).
+    split.
+    - unfold divides.
+      exists (q1 - q).
+      rewrite Zmult_minus_distr_l in H2.
+      symmetry.
+      rewrite Zmult_minus_distr_l.
+      intuition.
+    - assert (H5: Z.abs(x - x0) = Z.abs(x0 - x)).
+      {
+        destruct x.
+        - destruct x0.
+          + reflexivity.
+          + reflexivity.
+          + reflexivity.
+        - destruct x0.
+          + reflexivity.
+          + simpl. rewrite H7. rewrite Z.abs_opp. reflexivity.
+          + simpl. rewrite Pos2Z.inj_add. symmetry. rewrite Pos2Z.inj_add.
+            rewrite Z.add_comm. reflexivity.
+        - destruct x0.
+          + reflexivity.
+          + simpl. rewrite Pos2Z.inj_add. symmetry. rewrite Pos2Z.inj_add.
+            rewrite Z.add_comm. reflexivity.
+          + simpl. rewrite H7. rewrite Z.abs_opp. reflexivity.
+      }
+      rewrite H5.
+      apply H4.
+  }
+  assert (H6: x0 - x = 0).
+  {
+     intuition.
+  }
+  rewrite H6 in H2.
+  apply mult_lemma2_Z in H2.
+  destruct H2 as [H8 | H9].
+  - unfold not in H1.
+    apply H1 in H8.
+    inversion H8.
+  - apply Zminus_eq in H9.
+    apply H9.
+Qed.
+
+(** Lemma 11 euclides: unicidade do resto *)
+(** Prova que, dado a = b*q + r, r é único *)
+(** Para provarmos, utilizamos resultados provados anteriormente, *)
+(** precisando do resultado do lemma 6, além de resultados em missing.v, *)
+(** bem como resultados de bibliotecas, os quais às vezes precisaram ser *)
+(** adaptados e também o resultado que o quociente é único. *)
+Lemma remainder_uniquiness :  forall (a b r r1 : Z), (b <> 0) /\ (remainder r a b) /\ (remainder r1 a b) -> r = r1.
+Proof.
+  intros.
+  destruct H as [H1 [H2 H3]].
+  unfold remainder in H2.
+  unfold remainder in H3.
+  destruct H2.
+  destruct H3.
+  destruct H.
+  destruct H0.
+  inversion H0.
+  rewrite H in H0.
+  rewrite Z.add_move_l in H0.
+  rewrite Z.add_sub_swap in H0.
+  rewrite <- Z.mul_sub_distr_l in H0.
+  symmetry in H0.
+  rewrite Zeq_plus_swap in H0.
+  assert (H5: x0 = x).
+  {
+    apply quotient_uniquiness with (b:=b) (a:=a).
+    split.
+    apply H1.
+    split.
+    - unfold quotient. exists r1.
+      split.
+      apply H3.
+      apply H4.
+    - unfold quotient. exists r.
+      split.
+      apply H2.
+      apply H.
+  }
+  apply Zeq_minus in H5.
+  rewrite H5 in H0.
+  rewrite mult_symm_0 in H0.
+  symmetry in H0.
+  apply Zminus_eq in H0.
+  apply H0.
+Qed.
