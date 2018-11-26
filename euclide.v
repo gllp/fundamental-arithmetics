@@ -144,12 +144,22 @@ Proof.
   auto.
 Qed.
 
-(** Lemma 6 euclides: para todo b x x0, *)
+(** Lemma 6 euclides: para todo a b em Z, *)
+(** |a - b| = max a b - min a b *)
+(** Usou-se este lemma para auxiliar na prova do lemma 7 *)
+(** Não conseguimos efetuar a prova a tempo deste teorema, mas *)
+(** a ideia que tivemos seria partir do estudo dos casos em Z para a e b. *)
+Lemma abs_max_min : forall (a b : Z), Z.abs (a - b) = (Z.max a b) - (Z.min a b).
+Proof.
+Admitted.
+
+(** Lemma 7 euclides: para todo b x x0, *)
 (** 0 <= x < |b| e 0 <= x0 < b -> |x - x0| < |b| *)
-(** Tentou-se provar este lemma para auxiliar na prova da unicidade *)
-(** do quociente na divisão euclidiana, mas não conseguimos terminá-lo. *)
-(** A ideia era estudar os vários casos possíveis de b x x0 em Z e  *)
-(** utilizá-los para provar o lemma. *)
+(** Provou-se este lemma para auxiliar na prova da unicidade *)
+(** do quociente na divisão euclidiana. *)
+(** A ideia foi estudar os vários casos possíveis de b x x0 em Z e  *)
+(** utilizá-los para provar o lemma. Usamos propriedades de máximo, mínimo *)
+(**e módulo para provarmos *)
 Lemma smaller_number_div : forall (b x x0 : Z), (0 <= x < Z.abs b) /\ (0 <= x0 < Z.abs b)
   -> Z.abs (x - x0) < Z.abs b.
 Proof.
@@ -169,11 +179,99 @@ Proof.
       * simpl. apply impossible_Zneg in H0. intuition.
     + destruct x0.
       * simpl. apply H1.
-      * simpl.
-        assert (H3: Z.max (Z.pos p0) (Z.pos p1) < Z.pos p).
-Admitted.
+      * assert (H3: Z.max (Z.pos p0) (Z.pos p1) < Z.pos p).
+        {
+          apply Z.max_lub_lt.
+          apply H1.
+          apply H2.
+        }
+        assert (H4: forall (a b : Z), (Z.min a b) <= (Z.max a b) ).
+        {
+          intros.
+          apply Z.min_le_iff.
+          left.
+          apply Z.le_max_l.
+        }
+        assert (H5: 0 < Z.min (Z.pos p1) (Z.pos p0)).
+        {
+          apply Z.min_glb_lt.
+          intuition.
+          intuition.
+        }
+        assert (H6: Z.max (Z.pos p0) (Z.pos p1) - Z.min (Z.pos p1) (Z.pos p0) < Z.max (Z.pos p0) (Z.pos p1)  ).
+        {
+          apply Z.lt_sub_pos.
+          apply H5.
+        }
+        assert (H7: Z.max (Z.pos p0) (Z.pos p1) - Z.min (Z.pos p1) (Z.pos p0) < Z.pos p).
+        {
+          apply Z.lt_trans with (m:= Z.max (Z.pos p0) (Z.pos p1)).
+          apply H6.
+          apply H3.
+        }
+        assert (H8: Z.abs(Z.pos p0 - Z.pos p1) = Z.max (Z.pos p0) (Z.pos p1) - Z.min (Z.pos p0) (Z.pos p1)).
+        {
+          apply abs_max_min with (a:=(Z.pos p0)) (b:=(Z.pos p1)).
+        }
+        rewrite H8.
+        rewrite Z.min_comm.
+        apply H7.
+      * apply impossible_Zneg in H0.
+        inversion H0.
+    + apply impossible_Zneg in H.
+        inversion H.
+  - simpl. simpl in H1. simpl in H2.
+    destruct x.
+    + destruct x0.
+      * simpl. intuition.
+      * simpl. apply H2.
+      * simpl. apply impossible_Zneg in H0. intuition.
+    + destruct x0.
+      * simpl. apply H1.
+      * assert (H3: Z.max (Z.pos p0) (Z.pos p1) < Z.pos p).
+        {
+          apply Z.max_lub_lt.
+          apply H1.
+          apply H2.
+        }
+        assert (H4: forall (a b : Z), (Z.min a b) <= (Z.max a b) ).
+        {
+          intros.
+          apply Z.min_le_iff.
+          left.
+          apply Z.le_max_l.
+        }
+        assert (H5: 0 < Z.min (Z.pos p1) (Z.pos p0)).
+        {
+          apply Z.min_glb_lt.
+          intuition.
+          intuition.
+        }
+        assert (H6: Z.max (Z.pos p0) (Z.pos p1) - Z.min (Z.pos p1) (Z.pos p0) < Z.max (Z.pos p0) (Z.pos p1)  ).
+        {
+          apply Z.lt_sub_pos.
+          apply H5.
+        }
+        assert (H7: Z.max (Z.pos p0) (Z.pos p1) - Z.min (Z.pos p1) (Z.pos p0) < Z.pos p).
+        {
+          apply Z.lt_trans with (m:= Z.max (Z.pos p0) (Z.pos p1)).
+          apply H6.
+          apply H3.
+        }
+        assert (H8: Z.abs(Z.pos p0 - Z.pos p1) = Z.max (Z.pos p0) (Z.pos p1) - Z.min (Z.pos p0) (Z.pos p1)).
+        {
+          apply abs_max_min with (a:=(Z.pos p0)) (b:=(Z.pos p1)).
+        }
+        rewrite H8.
+        rewrite Z.min_comm.
+        apply H7.
+      * apply impossible_Zneg in H0.
+        inversion H0.
+    + apply impossible_Zneg in H.
+        inversion H.
+Qed.
 
-(** Lemma 7 euclides: se q é o quociente de a = b*q + r, e b > 0, *)
+(** Lemma 8 euclides: se q é o quociente de a = b*q + r, e b > 0, *)
 (** então q = floor (a / b) e a < b*q + q. Utlizado na prova *)
 (** do teorema da divisão euclidiana, não conseguimos prová-lo a tempo, *)
 (** mas está correto matematicamente, tendo sido verificado em "Teoria dos Números: um passeio pelo mundo inteiro com primos
@@ -194,7 +292,7 @@ Definition quotient (q a b : Z) := exists (r : Z), 0 <= r < Z.abs b /\ a = b * q
 (** Definição de resto da divisão euclidiana *)
 Definition remainder (r a b : Z) := exists (q : Z), a = b * q + r /\ (0 <= r < Z.abs b).
 
-(** Lemma 8 euclides: se b < 0, b * q <= a, onde q = ceil (a b). *)
+(** Lemma 9 euclides: se b < 0, b * q <= a, onde q = ceil (a b). *)
 (** Lemma usado na prova do teorema da divisão euclidiana, com b < 0. *)
 (** Para b < 0, o quociente é dado por ceil (a / b), o que garante r >= 0. *)
 (** Utilizado na prova do teorema da divisão euclidiana, não conseguimos prová-lo a tempo, *)
@@ -204,7 +302,7 @@ Lemma greater_then_ceil_neg : forall (a b : Z), (b < 0) ->  b * (ceil_div a b) <
 Proof.
 Admitted.
 
-(** Lemma 9 euclides: se b < 0, a - b * q < - b, onde q = ceil (a b). *)
+(** Lemma 10 euclides: se b < 0, a - b * q < - b, onde q = ceil (a b). *)
 (** Lemma usado na prova do teorema da divisão euclidiana, com b < 0. *)
 (** Para b < 0, o quociente é dado por ceil (a / b), o que garante r >= 0. *)
 (** Utilizado na prova do teorema da divisão euclidiana, não conseguimos prová-lo a tempo, *)
@@ -492,7 +590,7 @@ Proof.
         }
 Qed.
 
-(** Lemma 10 euclides: unicidade do quociente *)
+(** Lemma 11 euclides: unicidade do quociente *)
 (** Prova que, dado a = b*q + r, q é único *)
 (** Para provarmos, utilizamos resultados provados anteriormente, *)
 (** precisando do resultado do lemma 6, além de resultados em missing.v, *)
@@ -573,7 +671,7 @@ Proof.
     apply H9.
 Qed.
 
-(** Lemma 11 euclides: unicidade do resto *)
+(** Lemma 12 euclides: unicidade do resto *)
 (** Prova que, dado a = b*q + r, r é único *)
 (** Para provarmos, utilizamos resultados provados anteriormente, *)
 (** precisando do resultado do lemma 6, além de resultados em missing.v, *)
