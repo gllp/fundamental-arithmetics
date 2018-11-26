@@ -19,6 +19,6 @@
 **Compiles with Coq 8.1pl2**
 
 **Grupo do projeto:**
-Caio Carvalho - ccal
-Geovanny Lucas - gllp
-Rodrigo Castiel - rcrs2
+1. Caio Carvalho - ccal
+2. Geovanny Lucas - gllp
+3. Rodrigo Castiel - rcrs2
